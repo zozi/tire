@@ -167,7 +167,7 @@ module Tire
         # Serializes the search definitions as a multi-line string payload
         #
         def to_payload
-          to_array.map { |line| MultiJson.encode(line) }.join("\n") + "\n"
+          to_array.map { |line| MultiJson.dump(line) }.join("\n") + "\n"
         end
 
         # Returns the request URL
@@ -244,9 +244,9 @@ module Tire
 
             if Configuration.logger.level.to_s == 'debug'
               body = if @json
-                MultiJson.encode( @json, :pretty => Configuration.pretty)
+                MultiJson.dump( @json, :pretty => Configuration.pretty)
               else
-                MultiJson.encode( MultiJson.load(@response.body), :pretty => Configuration.pretty) rescue ''
+                MultiJson.dump( MultiJson.load(@response.body), :pretty => Configuration.pretty) rescue ''
               end
             else
               body = ''

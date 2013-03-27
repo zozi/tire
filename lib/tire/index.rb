@@ -32,11 +32,11 @@ module Tire
 
     def create(options={})
       @options = options
-      @response = Configuration.client.post url, MultiJson.encode(options)
+      @response = Configuration.client.post url, MultiJson.dump(options)
       @response.success? ? @response : false
 
     ensure
-      curl = %Q|curl -X POST #{url} -d '#{MultiJson.encode(options, :pretty => Configuration.pretty)}'|
+      curl = %Q|curl -X POST #{url} -d '#{MultiJson.dump(options, :pretty => Configuration.pretty)}'|
       logged('CREATE', curl)
     end
 
@@ -193,7 +193,7 @@ module Tire
         end
 
         output = []
-        output << MultiJson.encode(header)
+        output << MultiJson.dump(header)
         output << convert_document_to_json(document) unless action.to_s == 'delete'
         output.join("\n")
       end
@@ -340,11 +340,11 @@ module Tire
       type      = Utils.escape(type)
       url       = "#{self.url}/#{type}/#{Utils.escape(id)}/_update"
       url      += "?#{options.to_param}" unless options.keys.empty?
-      @response = Configuration.client.post url, MultiJson.encode(payload)
+      @response = Configuration.client.post url, MultiJson.dump(payload)
       MultiJson.load(@response.body)
 
     ensure
-      curl = %Q|curl -X POST "#{url}" -d '#{MultiJson.encode(payload, :pretty => Configuration.pretty)}'|
+      curl = %Q|curl -X POST "#{url}" -d '#{MultiJson.dump(payload, :pretty => Configuration.pretty)}'|
       logged(id, curl)
     end
 
@@ -358,7 +358,7 @@ module Tire
 
     def open(options={})
       # TODO: Remove the duplication in the execute > rescue > ensure chain
-      @response = Configuration.client.post "#{url}/_open", MultiJson.encode(options)
+      @response = Configuration.client.post "#{url}/_open", MultiJson.dump(options)
       MultiJson.load(@response.body)['ok']
 
     ensure
@@ -367,7 +367,7 @@ module Tire
     end
 
     def close(options={})
-      @response = Configuration.client.post "#{url}/_close", MultiJson.encode(options)
+      @response = Configuration.client.post "#{url}/_close", MultiJson.dump(options)
       MultiJson.load(@response.body)['ok']
 
     ensure
@@ -389,11 +389,11 @@ module Tire
     def register_percolator_query(name, options={}, &block)
       options[:query] = Search::Query.new(&block).to_hash if block_given?
 
-      @response = Configuration.client.put "#{Configuration.url}/_percolator/#{@name}/#{name}", MultiJson.encode(options)
+      @response = Configuration.client.put "#{Configuration.url}/_percolator/#{@name}/#{name}", MultiJson.dump(options)
       MultiJson.load(@response.body)['ok']
 
     ensure
-      curl = %Q|curl -X PUT "#{Configuration.url}/_percolator/#{@name}/#{name}?pretty" -d '#{MultiJson.encode(options, :pretty => Configuration.pretty)}'|
+      curl = %Q|curl -X PUT "#{Configuration.url}/_percolator/#{@name}/#{name}?pretty" -d '#{MultiJson.dump(options, :pretty => Configuration.pretty)}'|
       logged('_percolator', curl)
     end
 
@@ -417,11 +417,11 @@ module Tire
       payload = { :doc => document }
       payload.update( :query => query ) if query
 
-      @response = Configuration.client.get "#{url}/#{type}/_percolate", MultiJson.encode(payload)
+      @response = Configuration.client.get "#{url}/#{type}/_percolate", MultiJson.dump(payload)
       MultiJson.load(@response.body)['matches']
 
     ensure
-      curl = %Q|curl -X GET "#{url}/#{type}/_percolate?pretty" -d '#{MultiJson.encode(payload, :pretty => Configuration.pretty)}'|
+      curl = %Q|curl -X GET "#{url}/#{type}/_percolate?pretty" -d '#{MultiJson.dump(payload, :pretty => Configuration.pretty)}'|
       logged('_percolate', curl)
     end
 
@@ -435,9 +435,9 @@ module Tire
 
         if Configuration.logger.level.to_s == 'debug'
           body = if @response && @response.body && !@response.body.to_s.empty?
-              MultiJson.encode( MultiJson.load(@response.body), :pretty => Configuration.pretty)
+              MultiJson.dump( MultiJson.load(@response.body), :pretty => Configuration.pretty)
             elsif error && error.message && !error.message.to_s.empty?
-              MultiJson.encode( MultiJson.load(error.message), :pretty => Configuration.pretty) rescue ''
+              MultiJson.dump( MultiJson.load(error.message), :pretty => Configuration.pretty) rescue ''
             else ''
           end
         else

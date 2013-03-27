@@ -179,7 +179,7 @@ module Tire
         if payload.is_a?(String)
           payload
         else
-          MultiJson.encode(payload, :pretty => Configuration.pretty)
+          MultiJson.dump(payload, :pretty => Configuration.pretty)
         end
       end
 
@@ -193,9 +193,9 @@ module Tire
 
           if Configuration.logger.level.to_s == 'debug'
             body = if @json
-              MultiJson.encode( @json, :pretty => Configuration.pretty)
+              MultiJson.dump( @json, :pretty => Configuration.pretty)
             else
-              MultiJson.encode( MultiJson.load(@response.body), :pretty => Configuration.pretty) rescue ''
+              MultiJson.dump( MultiJson.load(@response.body), :pretty => Configuration.pretty) rescue ''
             end
           else
             body = ''

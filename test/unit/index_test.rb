@@ -744,7 +744,7 @@ module Tire
           class MyModel
             def document_type;   "my_model";                                      end
             def to_hash;         { :id => 1, :title => 'Foo', :_routing => 'A' }; end
-            def to_indexed_json; MultiJson.encode(to_hash);                       end
+            def to_indexed_json; MultiJson.dump(to_hash);                       end
           end
 
           Tire.index('my_models').bulk_store [ MyModel.new ]
