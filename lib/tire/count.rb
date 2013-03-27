@@ -34,7 +34,7 @@ module Tire
           STDERR.puts "[REQUEST FAILED] #{self.to_curl}\n"
           raise CountRequestFailed, @response.to_s
         end
-        @json     = MultiJson.decode(@response.body)
+        @json     = MultiJson.load(@response.body)
         @value    = @json['count']
         return self
       ensure

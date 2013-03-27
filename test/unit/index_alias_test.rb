@@ -67,7 +67,7 @@ module Tire
                              :routing => 1,
                              :filter  => { :terms => { :user => 'anne' } }
           # p @alias.to_json
-          result = MultiJson.decode @alias.to_json
+          result = MultiJson.load @alias.to_json
 
           assert_equal 3, result['actions'].size
           assert_equal 'index_2012_04', result['actions'][0]['add']['index']
@@ -89,7 +89,7 @@ module Tire
         should "add indices to alias" do
           Configuration.client.expects(:post).with do |url, json|
             # puts json
-            MultiJson.decode(json)['actions'].any? do |a|
+            MultiJson.load(json)['actions'].any? do |a|
               a['add']['index'] == 'index_A' &&
               a['add']['alias'] == 'alias_martha'
               end
@@ -103,7 +103,7 @@ module Tire
         should "remove indices from alias" do
           Configuration.client.expects(:post).with do |url, json|
             # puts json
-            MultiJson.decode(json)['actions'].any? do |a|
+            MultiJson.load(json)['actions'].any? do |a|
                 a['remove'] &&
                 a['remove']['index'] == 'index_A' &&
                 a['remove']['alias'] == 'alias_martha'
@@ -118,7 +118,7 @@ module Tire
         should "change alias configuration" do
           Configuration.client.expects(:post).with do |url, json|
             # puts json
-            MultiJson.decode(json)['actions'].all? { |a| a['add']['routing'] == 'martha' }
+            MultiJson.load(json)['actions'].all? { |a| a['add']['routing'] == 'martha' }
           end.returns(mock_response('{}'), 200)
 
           a = Alias.find('alias_martha')

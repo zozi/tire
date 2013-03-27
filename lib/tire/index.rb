@@ -77,7 +77,7 @@ module Tire
 
     def get_mapping
       @response = Configuration.client.get("#{url}/_mapping")
-      result = MultiJson.decode(@response.body)[@name]
+      result = MultiJson.load(@response.body)[@name]
       @response.success? ? result : false
     ensure
       curl = %Q|curl -X GET "#{url}/_mapping?pretty"|
@@ -96,7 +96,7 @@ module Tire
       payload = { type => mapping }.to_json
 
       @response = Configuration.client.put url, payload
-      result = MultiJson.decode(@response.body)
+      result = MultiJson.load(@response.body)
       @response.success? ? result : false
     ensure
       curl = %Q|curl -X PUT "#{url}" -d '#{payload}'|
@@ -114,7 +114,7 @@ module Tire
 
     def settings
       @response = Configuration.client.get("#{url}/_settings")
-      MultiJson.decode(@response.body)[@name]['settings']
+      MultiJson.load(@response.body)[@name]['settings']
     end
 
     def store(*args)
@@ -141,7 +141,7 @@ module Tire
       url  = id ? "#{self.url}/#{type}/#{Utils.escape(id)}#{params_encoded}" : "#{self.url}/#{type}/#{params_encoded}"
 
       @response = Configuration.client.post url, document
-      MultiJson.decode(@response.body)
+      MultiJson.load(@response.body)
     ensure
       curl = %Q|curl -X POST "#{url}" -d '#{document}'|
       logged([type, id].join('/'), curl)
@@ -297,7 +297,7 @@ module Tire
 
       url    = "#{self.url}/#{type}/#{Utils.escape(id)}"
       result = Configuration.client.delete url
-      MultiJson.decode(result.body) if result.success?
+      MultiJson.load(result.body) if result.success?
 
     ensure
       curl = %Q|curl -X DELETE "#{url}"|
@@ -317,7 +317,7 @@ module Tire
 
       @response = Configuration.client.get "#{url}#{params_encoded}"
 
-      h = MultiJson.decode(@response.body)
+      h = MultiJson.load(@response.body)
       wrapper = options[:wrapper] || Configuration.wrapper
       if wrapper == Hash then h
       else
@@ -341,7 +341,7 @@ module Tire
       url       = "#{self.url}/#{type}/#{Utils.escape(id)}/_update"
       url      += "?#{options.to_param}" unless options.keys.empty?
       @response = Configuration.client.post url, MultiJson.encode(payload)
-      MultiJson.decode(@response.body)
+      MultiJson.load(@response.body)
 
     ensure
       curl = %Q|curl -X POST "#{url}" -d '#{MultiJson.encode(payload, :pretty => Configuration.pretty)}'|
@@ -359,7 +359,7 @@ module Tire
     def open(options={})
       # TODO: Remove the duplication in the execute > rescue > ensure chain
       @response = Configuration.client.post "#{url}/_open", MultiJson.encode(options)
-      MultiJson.decode(@response.body)['ok']
+      MultiJson.load(@response.body)['ok']
 
     ensure
       curl = %Q|curl -X POST "#{url}/_open"|
@@ -368,7 +368,7 @@ module Tire
 
     def close(options={})
       @response = Configuration.client.post "#{url}/_close", MultiJson.encode(options)
-      MultiJson.decode(@response.body)['ok']
+      MultiJson.load(@response.body)['ok']
 
     ensure
       curl = %Q|curl -X POST "#{url}/_close"|
@@ -379,7 +379,7 @@ module Tire
       options = {:pretty => true}.update(options)
       params  = options.to_param
       @response = Configuration.client.get "#{url}/_analyze?#{params}", text
-      @response.success? ? MultiJson.decode(@response.body) : false
+      @response.success? ? MultiJson.load(@response.body) : false
 
     ensure
       curl = %Q|curl -X GET "#{url}/_analyze?#{params}" -d '#{text}'|
@@ -390,7 +390,7 @@ module Tire
       options[:query] = Search::Query.new(&block).to_hash if block_given?
 
       @response = Configuration.client.put "#{Configuration.url}/_percolator/#{@name}/#{name}", MultiJson.encode(options)
-      MultiJson.decode(@response.body)['ok']
+      MultiJson.load(@response.body)['ok']
 
     ensure
       curl = %Q|curl -X PUT "#{Configuration.url}/_percolator/#{@name}/#{name}?pretty" -d '#{MultiJson.encode(options, :pretty => Configuration.pretty)}'|
@@ -399,7 +399,7 @@ module Tire
 
     def unregister_percolator_query(name)
       @response = Configuration.client.delete "#{Configuration.url}/_percolator/#{@name}/#{name}"
-      MultiJson.decode(@response.body)['ok']
+      MultiJson.load(@response.body)['ok']
 
     ensure
       curl = %Q|curl -X DELETE "#{Configuration.url}/_percolator/#{@name}"|
@@ -410,7 +410,7 @@ module Tire
       document = args.shift
       type     = get_type_from_document(document)
 
-      document = MultiJson.decode convert_document_to_json(document)
+      document = MultiJson.load convert_document_to_json(document)
 
       query = Search::Query.new(&block).to_hash if block_given?
 
@@ -418,7 +418,7 @@ module Tire
       payload.update( :query => query ) if query
 
       @response = Configuration.client.get "#{url}/#{type}/_percolate", MultiJson.encode(payload)
-      MultiJson.decode(@response.body)['matches']
+      MultiJson.load(@response.body)['matches']
 
     ensure
       curl = %Q|curl -X GET "#{url}/#{type}/_percolate?pretty" -d '#{MultiJson.encode(payload, :pretty => Configuration.pretty)}'|

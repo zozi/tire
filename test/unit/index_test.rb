@@ -60,7 +60,7 @@ module Tire
       should "add an index alias" do
         Configuration.client.expects(:post).with do |url, payload|
           url =~ /_aliases/ &&
-          MultiJson.decode(payload)['actions'][0]['add'] == {'index' => 'dummy', 'alias' => 'foo'}
+          MultiJson.load(payload)['actions'][0]['add'] == {'index' => 'dummy', 'alias' => 'foo'}
         end.returns(mock_response('{"ok":true}'))
 
         @index.add_alias 'foo'
@@ -69,7 +69,7 @@ module Tire
       should "add an index alias with configuration" do
         Configuration.client.expects(:post).with do |url, payload|
           url =~ /_aliases/ &&
-          MultiJson.decode(payload)['actions'][0]['add'] == {'index' => 'dummy', 'alias' => 'foo', 'routing' => 1 }
+          MultiJson.load(payload)['actions'][0]['add'] == {'index' => 'dummy', 'alias' => 'foo', 'routing' => 1 }
         end.returns(mock_response('{"ok":true}'))
 
         @index.add_alias 'foo', :routing => 1
@@ -79,7 +79,7 @@ module Tire
         Configuration.client.expects(:get).returns(mock_response({'dummy' => {'aliases' => {'foo' => {}}}}.to_json))
         Configuration.client.expects(:post).with do |url, payload|
           url =~ /_aliases/ &&
-          MultiJson.decode(payload)['actions'][0]['remove'] == {'index' => 'dummy', 'alias' => 'foo'}
+          MultiJson.load(payload)['actions'][0]['remove'] == {'index' => 'dummy', 'alias' => 'foo'}
         end.returns(mock_response('{"ok":true}'))
 
         @index.remove_alias 'foo'
@@ -544,7 +544,7 @@ module Tire
 
         should "send script payload" do
           Configuration.client.expects(:post).with do |url,payload|
-                                payload = MultiJson.decode(payload)
+                                payload = MultiJson.load(payload)
                                 # p [url, payload]
                                 assert_equal( "#{@index.url}/document/42/_update", url ) &&
                                 assert_not_nil( payload['script'] ) &&
@@ -559,7 +559,7 @@ module Tire
 
         should "send partial doc payload" do
           Configuration.client.expects(:post).with do |url,payload|
-                                payload = MultiJson.decode(payload)
+                                payload = MultiJson.load(payload)
                                 # p [url, payload]
                                 assert_equal( "#{@index.url}/document/42/_update", url ) &&
                                 assert_not_nil( payload['doc'] ) &&
@@ -573,7 +573,7 @@ module Tire
 
         should "send options" do
           Configuration.client.expects(:post).with do |url,payload|
-                                payload = MultiJson.decode(payload)
+                                payload = MultiJson.load(payload)
                                 # p [url, payload]
                                 assert_equal( "#{@index.url}/document/42/_update?timeout=1000", url ) &&
                                 assert_nil( payload['timeout'] )
@@ -947,7 +947,7 @@ module Tire
         should "register percolator query as a Hash" do
           query = { :query => { :query_string => { :query => 'foo' } } }
           Configuration.client.expects(:put).with do |url, payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                assert_equal "#{Configuration.url}/_percolator/dummy/my-query",
                                                             url
                                                assert_equal 'foo', payload['query']['query_string']['query']
@@ -965,7 +965,7 @@ module Tire
 
         should "register percolator query as a block" do
           Configuration.client.expects(:put).with do |url, payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                assert_equal "#{Configuration.url}/_percolator/dummy/my-query",
                                                             url
                                                assert_equal 'foo', payload['query']['query_string']['query']
@@ -988,7 +988,7 @@ module Tire
                     :tags  => ['alert'] }
 
           Configuration.client.expects(:put).with do |url, payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                assert_equal "#{Configuration.url}/_percolator/dummy/my-query",
                                                             url
                                                assert_equal 'foo',     payload['query']['query_string']['query']
@@ -1013,7 +1013,7 @@ module Tire
 
         should "percolate document against all registered queries" do
           Configuration.client.expects(:get).with do |url,payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                assert_equal "#{@index.url}/document/_percolate", url
                                                assert_equal 'Test', payload['doc']['title']
                                               end.
@@ -1025,7 +1025,7 @@ module Tire
 
         should "percolate a typed document against all registered queries" do
           Configuration.client.expects(:get).with do |url,payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                assert_equal "#{@index.url}/article/_percolate", url
                                                assert_equal 'Test', payload['doc']['title']
                                               end.
@@ -1037,7 +1037,7 @@ module Tire
 
         should "percolate document against specific queries" do
           Configuration.client.expects(:get).with do |url,payload|
-                                               payload = MultiJson.decode(payload)
+                                               payload = MultiJson.load(payload)
                                                # p [url, payload]
                                                assert_equal "#{@index.url}/document/_percolate", url
                                                assert_equal 'Test', payload['doc']['title']

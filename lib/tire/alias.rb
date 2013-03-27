@@ -92,7 +92,7 @@ module Tire
     def self.all(index=nil)
       @response = Configuration.client.get [Configuration.url, index, '_aliases'].compact.join('/')
 
-      aliases = MultiJson.decode(@response.body).inject({}) do |result, (index, value)|
+      aliases = MultiJson.load(@response.body).inject({}) do |result, (index, value)|
         # 1] Skip indices without aliases
         next result if value['aliases'].empty?
 

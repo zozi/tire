@@ -223,7 +223,7 @@ module Tire
             STDERR.puts "[REQUEST FAILED] #{to_curl}\n"
             raise SearchRequestFailed, @response.to_s
           end
-          @json     = MultiJson.decode(@response.body)
+          @json     = MultiJson.load(@response.body)
           @results  = Tire::Search::Multi::Results.new @searches, @json['responses']
           return self
         ensure
